@@ -4,7 +4,7 @@ function genNode(){
 }
 
 function gen(...args: number[]) {
-    return genNode()
+    return genNode()+"";
 }
 
 export default gen
