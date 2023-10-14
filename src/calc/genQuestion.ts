@@ -28,7 +28,7 @@ function toMixedFraction(fraction:any,showDecimal:boolean) {
 function fromMixedFraction(input:any){
     //把带分数字符串换成规范的数字
     if(typeof input === 'string'){
-        var num = input.trim().split(" ");
+        var num = input.trim().replace(/'([^']+)'/g, '$1').split(" ");
         if(num.length==2){
             //带分数12 3/4
             var n = num[0],result,f=math.fraction(num[1]);
@@ -41,7 +41,7 @@ function fromMixedFraction(input:any){
             return result
         }
     }
-    return input;
+    return math.fraction(input);
 }
 
 
@@ -109,6 +109,8 @@ function genFormula(level:number) {
 }
 
 function checkResult(question:any,answer:any){
+	console.log(typeof question,question)
+	console.log(typeof answer,answer)
     return math.equal(fromMixedFraction(question), fromMixedFraction(answer));
     // console.log(result.n===0&&result.d===1+" vs "+result2);
     // var result = math.compare(question, answer);

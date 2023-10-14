@@ -7,7 +7,7 @@
   "sideEffects": false,
   "scripts": {
     "dev": "npx webpack serve",
-    "build": "npm run test & npm run generate:esm & npm run generate:umd",
+    "build": "npm run generate:esm & npm run generate:umd",
     "generate:umd": "cross-env NODE_ENV=production OUTPUT_TYPE=umd webpack --config ./webpack.config.js",
     "generate:esm": "cross-env NODE_ENV=production OUTPUT_TYPE=esm webpack --config ./webpack.config.js",
     "test": "jest ./src/calc/index.test.ts"
