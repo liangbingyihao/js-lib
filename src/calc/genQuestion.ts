@@ -1,9 +1,10 @@
 const math = require('mathjs');
 
-function toMixedFraction(fraction:any,showDecimal:boolean) {
+function toMixedFraction(input:any,showDecimal:boolean) {
     //把数字转换成用户能看懂的带分数
-    if(fraction.n==0&&fraction.d==0){
-        return "0";
+    var fraction = math.fraction(input);
+    if(fraction.d==0){
+        return fraction.n;
     }
     var wholePart = Math.floor(fraction.n / fraction.d);
     var remainder = fraction.n % fraction.d;
@@ -50,6 +51,9 @@ function generateRandomNumber(min: number, max: number): any {
 }
 
 function generateRandomFraction(factor:number): any {
+    if(factor==0){
+        return 0;
+    }
     var x = generateRandomNumber(2,10)*generateRandomNumber(2,10);
     var y = factor*generateRandomNumber(3,7);
     return math.fraction(x,y);
@@ -63,11 +67,14 @@ function getRandomOp() {
     return isRandomNumberOne ? -1 : 1;
   }
 
-function generateRationalNumber(min: number, max: number,factor:number): any{
+function generateRationalNumber(min: number, max: number,factor:number,negative:boolean): any{
     // var n = math.fraction(generateRandomNumber(min,max),1);
     var n = generateRandomNumber(min,max);
     var f = generateRandomFraction(factor);
-    var s = getRandomOp();
+    var s = 1;
+    if(negative){
+        s = getRandomOp();
+    }
     var r = math.chain(n).add(f).multiply(s).done();
     return {"n":n,"d":math.format(f, { fraction: 'ratio' }),"f":f,"s":s,"vaule":r,"term":toMixedFraction(r,true)};
 }
@@ -91,16 +98,22 @@ function generateNodeStr(left:any,right:any,op:number){
 
 }
 
-function genNode(factor:number){
-    var left=generateRationalNumber(0,100,factor),right=generateRationalNumber(0,100,factor),op=getRandomOp();
+function genNode(factor:number,negative:boolean){
+    var left=generateRationalNumber(0,100,factor,negative),right=generateRationalNumber(0,100,factor,negative),op=getRandomOp();
     return generateNodeStr(left,right,op);
 }
 
 function genFormula(level:number) {
-    var factor = generateRandomNumber(2,10);
-    var result = genNode(factor);
+    var factor = 0,negative=false;
+    if(level>3){
+        factor = generateRandomNumber(2,10);
+    }
+    if(level>6){
+        negative=true;
+    }
+    var result = genNode(factor,negative);
     while(level>0){
-        result = generateNodeStr(result,genNode(factor),getRandomOp());
+        result = generateNodeStr(result,genNode(factor,negative),getRandomOp());
         level--;
     }
     // checkResult(" -1.125 ", -1.8);
@@ -112,9 +125,6 @@ function checkResult(question:any,answer:any){
 	console.log(typeof question,question)
 	console.log(typeof answer,answer)
     return math.equal(fromMixedFraction(question), fromMixedFraction(answer));
-    // console.log(result.n===0&&result.d===1+" vs "+result2);
-    // var result = math.compare(question, answer);
-    // return result.n===0&&result.d===1;
 }
 const genQuestion = {
     genFormula,
