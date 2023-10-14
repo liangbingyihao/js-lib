@@ -2,15 +2,16 @@ import add from './add'
 import subtract from './subtract'
 import multiply from './multiply'
 import divide from './divide'
-import genFormula from './gen'
+import {genFormula,checkResult} from './genQuestion'
 
 const calc = {
   add,
   subtract,
   multiply,
   divide,
-  genFormula
+  genFormula,
+  checkResult
 }
 
 export default calc
-export { add, subtract, multiply, divide,genFormula }
+export { add, subtract, multiply, divide,genFormula,checkResult }
