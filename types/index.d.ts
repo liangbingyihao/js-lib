@@ -2,13 +2,14 @@ import add from './add';
 import subtract from './subtract';
 import multiply from './multiply';
 import divide from './divide';
-import gen from './gen';
+import { genFormula, checkResult } from './genQuestion';
 declare const calc: {
     add: typeof add;
     subtract: typeof subtract;
     multiply: typeof multiply;
     divide: typeof divide;
-    gen: typeof gen;
+    genFormula: typeof genFormula;
+    checkResult: typeof checkResult;
 };
 export default calc;
-export { add, subtract, multiply, divide, gen };
+export { add, subtract, multiply, divide, genFormula, checkResult };

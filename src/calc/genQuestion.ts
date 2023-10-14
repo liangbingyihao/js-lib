@@ -1,6 +1,7 @@
 const math = require('mathjs');
 
 function toMixedFraction(fraction:any,showDecimal:boolean) {
+    //把数字转换成用户能看懂的带分数
     if(fraction.n==0&&fraction.d==0){
         return "0";
     }
@@ -24,6 +25,25 @@ function toMixedFraction(fraction:any,showDecimal:boolean) {
     }
   }
   
+function fromMixedFraction(input:any){
+    //把带分数字符串换成规范的数字
+    if(typeof input === 'string'){
+        var num = input.trim().split(" ");
+        if(num.length==2){
+            //带分数12 3/4
+            var n = num[0],result,f=math.fraction(num[1]);
+            if(n[0][0]==="-"){
+                result = math.chain(n).multiply(-1).add(f).multiply(-1).done();
+            }else{
+                result = math.chain(n).add(f).done();
+            }
+            console.log(input,result,toMixedFraction(result,false))
+            return result
+        }
+    }
+    return input;
+}
+
 
 function generateRandomNumber(min: number, max: number): any {
     return Math.floor(Math.random() * (max - min) + min);
@@ -83,14 +103,16 @@ function genFormula(level:number) {
         result = generateNodeStr(result,genNode(factor),getRandomOp());
         level--;
     }
-    console.log(checkResult(math.fraction(1,4), 0.25))
+    // checkResult(" -1.125 ", -1.8);
+    // fromMixedFraction(" -12 0/4 ")
     return result;
 }
 
 function checkResult(question:any,answer:any){
-    var result = math.compare(question, answer)
-    console.log(result);
-    return result.n===0&&result.d===1;
+    return math.equal(fromMixedFraction(question), fromMixedFraction(answer));
+    // console.log(result.n===0&&result.d===1+" vs "+result2);
+    // var result = math.compare(question, answer);
+    // return result.n===0&&result.d===1;
 }
 const genQuestion = {
     genFormula,
