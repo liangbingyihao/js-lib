@@ -1,6 +1,6 @@
-declare function genFormula(level: number): {
+declare function genFormula(level: number, size: number): {
     term: string;
-    resultStr: string;
+    resultStr: any;
     op: number;
     left: any;
     right: any;

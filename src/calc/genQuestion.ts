@@ -20,15 +20,36 @@ function toMixedFraction(input:any,showDecimal:boolean) {
     }else if (showDecimal && (decimal==0.125||decimal==0.75||decimal==0.25||decimal==0.5||decimal==0.4||decimal==0.6||decimal==0.8)){
         return sig+fraction.n / fraction.d;
     } else if(wholePart==0) {
-        return sig+remainder + '/' + fraction.d;
+        return sig+"'"+remainder + '/' + fraction.d+"'";
     } else {
-        return "'"+sig+wholePart.toString() +" "+ remainder + '/' + fraction.d+"'"; // 带分数情况
+        return sig+wholePart.toString() +" "+"'"+remainder + '/' + fraction.d+"'"; // 带分数情况
     }
   }
   
+function splitMixedFraction(input:any){
+	//把带分数分成三部分字符串(主体，分子，分母)
+	if(typeof input === 'string' && input.includes("'")){
+		var num = input.trim().replace(/'([^']+)'/g, '$1').split(" ");
+		var result = {"main":"","n":"","d":""},fraction=null;
+		if(num.length==2){
+			result["main"] = num[0];
+			fraction = num[1];
+		}else{
+			fraction = num[0];
+		}
+		if(fraction!=null){
+			var nd = fraction.split("/");
+			result.n=nd[0];
+			result.d=nd[1];			
+		}
+		return result;
+	}
+	return {"main":input};
+}
+  
 function fromMixedFraction(input:any){
     //把带分数字符串换成规范的数字
-    if(typeof input === 'string'){
+    if(typeof input === 'string' && input.includes("'")){
         var num = input.trim().replace(/'([^']+)'/g, '$1').split(" ");
         if(num.length==2){
             //带分数12 3/4
@@ -41,6 +62,7 @@ function fromMixedFraction(input:any){
             console.log(input,result,toMixedFraction(result,false))
             return result
         }
+		return math.fraction(num[0]);
     }
     return math.fraction(input);
 }
@@ -103,7 +125,7 @@ function genNode(factor:number,negative:boolean){
     return generateNodeStr(left,right,op);
 }
 
-function genFormula(level:number) {
+function genFormula(level:number,size:number) {
     var factor = 0,negative=false;
     if(level>3){
         factor = generateRandomNumber(2,10);
@@ -111,20 +133,26 @@ function genFormula(level:number) {
     if(level>6){
         negative=true;
     }
+	console.log(level,size);
     var result = genNode(factor,negative);
-    while(level>0){
+    while(size>0){
         result = generateNodeStr(result,genNode(factor,negative),getRandomOp());
-        level--;
+        size--;
     }
     // checkResult(" -1.125 ", -1.8);
     // fromMixedFraction(" -12 0/4 ")
     return result;
 }
 
-function checkResult(question:any,answer:any){
-	console.log(typeof question,question)
-	console.log(typeof answer,answer)
-    return math.equal(fromMixedFraction(question), fromMixedFraction(answer));
+function checkResult(correct:any,answer:any){
+	console.log(typeof correct,correct,fromMixedFraction(correct))
+	console.log(typeof answer,answer, fromMixedFraction(answer))
+    var result = math.equal(fromMixedFraction(correct), fromMixedFraction(answer));
+	if(result){
+		return null;
+	}else{
+		return splitMixedFraction(correct);
+	}
 }
 const genQuestion = {
     genFormula,
