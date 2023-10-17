@@ -1,4 +1,4 @@
-import {genFormula,checkResult} from './genQuestion'
+import {genFormula,checkResult} from './genFormula'
 
 const calc = {
   genFormula,

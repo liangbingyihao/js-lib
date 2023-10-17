@@ -112,6 +112,22 @@ function generateRationalNumber(min: number, max: number,factor:number,negative:
     return {"n":n,"d":math.format(f, { fraction: 'ratio' }),"f":f,"s":s,"value":r,"term":toMixedFraction(r,true)};
 }
 
+function generateDevidedRationalNumber(n: number, d: number,factor:number,negative:boolean): any{
+    // var n=n*factor*generateRandomNumber(2,7),d=d*generateRandomNumber(2,7);
+    // var f = math.fraction(n%d,d);
+    // var s = 1;
+    // if(negative){
+    //     s = getRandomS();
+    // }
+    // var right:any = {"n":n,"d":math.format(f, { fraction: 'ratio' }),"f":f,"s":s,"value":r,"term":toMixedFraction(r,true)};
+    // var s = 1;
+    // if(negative){
+    //     s = getRandomS();
+    // }
+    // var r = math.fraction(x,y);
+    // return {"n":n,"d":math.format(f, { fraction: 'ratio' }),"f":f,"s":s,"value":r,"term":toMixedFraction(r,true)};
+}
+
 function generateNodeStr(left:any,right:any,op:number){
     //op:0+1-2*3/
     var result,opStr,term;
@@ -160,7 +176,7 @@ function generateNodeStr(left:any,right:any,op:number){
 }
 
 function genLeaf(min:number,max:number,factor:number,negative:boolean,op:number){
-    //op:0+1-2*4/,negative:是否有负数，factor：分数的公因数，0表示没有分数
+    //op:0+1-2*4/,negative:是否有负数，factor：分母的公因数，0表示没有分数
     //返回number[+-*/]number
     //fix min,max应当是控制返回的范围，而不是控制每一个数的范围
     if(op>1){
@@ -169,9 +185,9 @@ function genLeaf(min:number,max:number,factor:number,negative:boolean,op:number)
     }
     var left;
     if(factor==0&&op==3){
-        //三年级...要能整除才行
+        //三年级.除法..要能整除才行
         var right = generateRationalNumber(2,10,factor,negative)
-        left = right.n*generateRandomNumber(1,10);
+        left = right.n*generateRandomNumber(2,10);
         left = generateRationalNumber(left,left,factor,negative)
         return generateNodeStr(left,right,op);
     }
@@ -183,14 +199,17 @@ function genLeaf(min:number,max:number,factor:number,negative:boolean,op:number)
             return left;
         }
     }else if(op==3){
-        //不出现0、1
+        //被除数不出现0、1;需要构造简单点的被除数: if left:n/d then right: n*x*factor/d*y
         min = 2;
+        // var n=left.value.n*factor*generateRandomNumber(2,7),d=left.value.d*generateRandomNumber(2,7);
+        // var f = math.fraction(n,d),s=;
+        // var right:any = {"n":n,"d":math.format(f, { fraction: 'ratio' }),"f":f,"s":s,"value":r,"term":toMixedFraction(r,true)};
     }
     return generateNodeStr(left,generateRationalNumber(min,max,factor,negative),op);
 }
 
 function genNode(min:number,max:number,factor:number,negative:boolean,numOP:number){
-    //op:0+1-2*4/,negative:是否有负数，factor：分数的公因数，0表示没有分数
+    //op:0+1-2*4/,negative:是否有负数，factor：分母的公因数，0表示没有分数
     //返回leaf[+-*/]leaf
     var left = genLeaf(min,max,factor,negative,generateRandomNumber(0,numOP));
     var op=generateRandomNumber(0,numOP);   
@@ -240,24 +259,6 @@ function genFormula(level:number,size:number) {
     }else{
         return genNode(min,max,factor,negative,generateRandomNumber(minOP,maxOP))
     }
-    // var left = genLeaf(min,max,factor,negative,generateRandomNumber(0,numOP));
-    // if(size>1){
-    //     var right,op=generateRandomNumber(0,numOP);   
-    //     if(!negative&&op==1){
-    //         //不能出现负数
-    //         max = Math.round(left.value);
-    //         if(max==0){
-    //             return left;
-    //         }
-    //         right=genLeaf(min,max,factor,negative,generateRandomNumber(0,numOP));
-    //     }else if(op==3){
-    //         //不能出现0
-    //         right=genLeaf(min,max,factor,negative,generateRandomNumber(0,numOP));
-    //     }else{
-    //         right=genLeaf(min,max,factor,negative,generateRandomNumber(0,numOP));
-    //     }
-    //     return generateNodeStr(left,right,op);
-    // }
 }
 
 function checkResult(correct:any,answer:any){
