@@ -89,59 +89,172 @@ function getRandomOp() {
     return isRandomNumberOne ? -1 : 1;
   }
 
+  function getRandomS() {
+    // 生成一个随机布尔值，true 或 false
+    const isRandomNumberOne = Math.random() < 0.5;
+  
+    // 根据随机布尔值返回其中一个数
+    return isRandomNumberOne ? -1 : 1;
+  }
+
 function generateRationalNumber(min: number, max: number,factor:number,negative:boolean): any{
     // var n = math.fraction(generateRandomNumber(min,max),1);
     var n = generateRandomNumber(min,max);
     var f = generateRandomFraction(factor);
     var s = 1;
     if(negative){
-        s = getRandomOp();
+        s = getRandomS();
     }
     var r = math.chain(n).add(f).multiply(s).done();
-    return {"n":n,"d":math.format(f, { fraction: 'ratio' }),"f":f,"s":s,"vaule":r,"term":toMixedFraction(r,true)};
+    return {"n":n,"d":math.format(f, { fraction: 'ratio' }),"f":f,"s":s,"value":r,"term":toMixedFraction(r,true)};
 }
 
 function generateNodeStr(left:any,right:any,op:number){
+    //op:0+1-2*3/
     var result,opStr,term;
-    if(op==1){
+    if(op==0){
         opStr = "+";
-        result =  math.add(left["vaule"], right["vaule"]);
+        result =  math.add(left["value"], right["value"]);
         if(right["term"].startsWith("-")||right["term"].startsWith("'-")){
             term = left["term"]+opStr+"("+right["term"]+(")");
         }else{
             term = left["term"]+opStr+right["term"];
         }
-    }else{
+    } else if(op==1){
         opStr="-"
-        result = math.subtract(left["vaule"], right["vaule"])
-        term = left["term"]+opStr+"("+right["term"]+(")");
+        result = math.subtract(left["value"], right["value"])
+        if(right.s==1){
+            term = left["term"]+opStr+right["term"];
+        }else{
+            term = left["term"]+opStr+"("+right["term"]+(")");
+        }
+    } else{
+        if(op==2){
+            opStr="*"
+            result = math.multiply(left["value"], right["value"])
+        }else{
+            opStr="/"
+            result = math.divide(left["value"], right["value"])
+        }
+        term="";
+        // if(left.s==undefined&&!/[^+-]/.test(left["term"])){
+        if(left.s==undefined){
+            // console.log("left",opStr,left)
+            term="("+left["term"]+")"+opStr;
+        }else{
+            term=left["term"]+opStr;
+        }
+        if(right.s==undefined){
+            // console.log("right",opStr,right)
+            term+="("+right["term"]+(")");
+        }else{
+            term+=right["term"];
+        }
+
     }
-    return {"term":term,"resultStr":toMixedFraction(result,false),"op":op,"left":left,"right":right,"vaule":result};
+    return {"term":term,"resultStr":toMixedFraction(result,false),"op":op,"left":left,"right":right,"value":result};
 
 }
 
-function genNode(factor:number,negative:boolean){
-    var left=generateRationalNumber(0,100,factor,negative),right=generateRationalNumber(0,100,factor,negative),op=getRandomOp();
-    return generateNodeStr(left,right,op);
+function genLeaf(min:number,max:number,factor:number,negative:boolean,op:number){
+    //op:0+1-2*4/,negative:是否有负数，factor：分数的公因数，0表示没有分数
+    //返回number[+-*/]number
+    //fix min,max应当是控制返回的范围，而不是控制每一个数的范围
+    if(op>1){
+        //乘法不要出现1
+        min = 2;
+    }
+    var left;
+    if(factor==0&&op==3){
+        //三年级...要能整除才行
+        var right = generateRationalNumber(2,10,factor,negative)
+        left = right.n*generateRandomNumber(1,10);
+        left = generateRationalNumber(left,left,factor,negative)
+        return generateNodeStr(left,right,op);
+    }
+    left = generateRationalNumber(min,max,factor,negative);
+    if(!negative&&op==1){
+        //确保不能出现负数
+        max = Math.round(left.value);
+        if(max==0){
+            return left;
+        }
+    }else if(op==3){
+        //不出现0、1
+        min = 2;
+    }
+    return generateNodeStr(left,generateRationalNumber(min,max,factor,negative),op);
+}
+
+function genNode(min:number,max:number,factor:number,negative:boolean,numOP:number){
+    //op:0+1-2*4/,negative:是否有负数，factor：分数的公因数，0表示没有分数
+    //返回leaf[+-*/]leaf
+    var left = genLeaf(min,max,factor,negative,generateRandomNumber(0,numOP));
+    var op=generateRandomNumber(0,numOP);   
+    if(!negative&&op==1){
+        //不能出现负数
+        max = Math.round(left.value);
+    }else if(op==3){
+        //不出现0
+        min = 1;
+    }
+    return generateNodeStr(left,genLeaf(min,max,factor,negative,generateRandomNumber(0,numOP)),op);
 }
 
 function genFormula(level:number,size:number) {
-    var factor = 0,negative=false;
+    // <option value="1">学前(10以内)</option>
+    // <option value="2">1(100以内)</option>
+    // <option value="3">2~3(乘除)</option>
+    // <option value="4" selected>4~6(小数)</option> 不要出现负数?
+    // <option value="7">7(有理数)</option>
+    var factor = 0,negative=false,min=1,max=101,minOP=0,maxOP=4;
     if(level>3){
+        //四年级后这里开始出现乘除、混合运算
         factor = generateRandomNumber(2,10);
+    }else if(level<3){
+        //低幼版，不要混合运算了
+        size=1;
+        //2:加减,4:加减乘除
+        maxOP=2;
+        if(level<=1){
+            min=3;
+            max=10;
+        }else{
+            //100以上加减
+            min=10;
+        }
+    } else{
+        //专门考乘除
+        minOP=2,min=1,max=10,size=1;
     }
     if(level>6){
+        //这里开始出现负数
         negative=true;
     }
-	console.log(level,size);
-    var result = genNode(factor,negative);
-    while(size>0){
-        result = generateNodeStr(result,genNode(factor,negative),getRandomOp());
-        size--;
+    if(size<=1){
+        //不出现混合运算
+        return genLeaf(min,max,factor,negative,generateRandomNumber(minOP,maxOP));
+    }else{
+        return genNode(min,max,factor,negative,generateRandomNumber(minOP,maxOP))
     }
-    // checkResult(" -1.125 ", -1.8);
-    // fromMixedFraction(" -12 0/4 ")
-    return result;
+    // var left = genLeaf(min,max,factor,negative,generateRandomNumber(0,numOP));
+    // if(size>1){
+    //     var right,op=generateRandomNumber(0,numOP);   
+    //     if(!negative&&op==1){
+    //         //不能出现负数
+    //         max = Math.round(left.value);
+    //         if(max==0){
+    //             return left;
+    //         }
+    //         right=genLeaf(min,max,factor,negative,generateRandomNumber(0,numOP));
+    //     }else if(op==3){
+    //         //不能出现0
+    //         right=genLeaf(min,max,factor,negative,generateRandomNumber(0,numOP));
+    //     }else{
+    //         right=genLeaf(min,max,factor,negative,generateRandomNumber(0,numOP));
+    //     }
+    //     return generateNodeStr(left,right,op);
+    // }
 }
 
 function checkResult(correct:any,answer:any){

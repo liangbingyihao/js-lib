@@ -1,12 +1,7 @@
-declare function genFormula(level: number, size: number): {
-    term: string;
-    resultStr: any;
-    op: number;
-    left: any;
-    right: any;
-    vaule: any;
-};
-declare function checkResult(question: any, answer: any): any;
+declare function genFormula(level: number, size: number): any;
+declare function checkResult(correct: any, answer: any): {
+    main: any;
+} | null;
 declare const genQuestion: {
     genFormula: typeof genFormula;
     checkResult: typeof checkResult;

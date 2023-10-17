@@ -12,10 +12,7 @@ const config = {
     // 打包输出 ESM 格式文件，最终要输出多个文件，便于实现按需加载，因此设置为多入口。
     outputType === 'esm'
       ? {
-          add: './src/calc/add.ts',
-          subtract: './src/calc/subtract.ts',
-          multiply: './src/calc/multiply.ts',
-          divide: './src/calc/divide.ts'
+          genQuestion: './src/calc/genQuestion.ts'
         }
       : isProduction
       ? './src/calc/index.ts'
