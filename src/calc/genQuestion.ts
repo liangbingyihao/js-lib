@@ -48,6 +48,9 @@ function splitMixedFraction(input:any){
 }
   
 function fromMixedFraction(input:any){
+	if(input === null || input === undefined || input.trim() === ""){
+		return null;
+	}
     //把带分数字符串换成规范的数字
     if(typeof input === 'string' && input.includes("'")){
         var num = input.trim().replace(/'([^']+)'/g, '$1').split(" ");
