@@ -126,7 +126,7 @@ function genNodeFromResult(result:any,minOP:number,maxOp:number,negative:boolean
                 // right = math.fraction(result.n/nfactor,result.d/dfactor)
                 right = math.divide(result,left);
             }
-            term = toMixedFraction(left)+"*("+toMixedFraction(right)+")"
+            term = toMixedFraction(left)+"×("+toMixedFraction(right)+")"
             break;
         case 3:
             if(!fraction){
@@ -142,12 +142,12 @@ function genNodeFromResult(result:any,minOP:number,maxOp:number,negative:boolean
                 right = math.divide(left,result);
                 // right = math.fraction(result.d/dfactor,result.n/nfactor)
             }
-            term = toMixedFraction(left)+"/("+toMixedFraction(right)+")"
+            term = toMixedFraction(left)+"÷("+toMixedFraction(right)+")"
             break;
         default:
             break;
     }
-    return {"term":term,"value":toMixedFraction(result),"left":left,"right":right,"result":result,"op":op}
+    return {"term":term,"value":math.format(result, { fraction: 'ratio' }),"left":left,"right":right,"result":result,"op":op}
 }
 
 function genFormula(level:number,size:number) {
@@ -199,13 +199,14 @@ function genFormula(level:number,size:number) {
 function checkResult(correct:any,answer:any){
 	console.log(typeof correct,correct,fromMixedFraction(correct))
 	console.log(typeof answer,answer, fromMixedFraction(answer))
-    var result = math.equal(fromMixedFraction(correct), fromMixedFraction(answer));
+	correct = math.fraction(correct);
+    var result = math.equal(correct, math.fraction(answer));
 	if(result){
 		return null;
 	}else{
         var fix = math.fix(correct)
         var fraction = math.subtract(correct,fix)
-        return {"main":math.fix(correct).n,"n":fraction.n,"d":fraction.d}
+        return {"main":fix.n,"n":fraction.n,"d":fraction.d}
 	}
 }
 
