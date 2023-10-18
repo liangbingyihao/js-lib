@@ -1,4 +1,4 @@
-import { genFormula, checkResult } from './genQuestion';
+import { genFormula, checkResult } from './genFormula';
 declare const calc: {
     genFormula: typeof genFormula;
     checkResult: typeof checkResult;

@@ -9,37 +9,59 @@ function toMixedFraction(fraction:any,showDecimal:boolean=false) {
     if(fraction==null||fraction==undefined){
         return "";
     }
+    var term;
     if(fraction.d==0){
-        return fraction.n;
+        term = fraction.n;
+    } else{
+        var wholePart = Math.floor(fraction.n / fraction.d);
+        var remainder = fraction.n % fraction.d;
+        var decimal = remainder/fraction.d;
+      
+        if (decimal === 0) {
+            term =  wholePart.toString(); // 整数情况
+        }else if (showDecimal && (decimal==0.125||decimal==0.75||decimal==0.25||decimal==0.5||decimal==0.4||decimal==0.6||decimal==0.8)){
+            term =  fraction.n / fraction.d;
+        } else if(wholePart==0) {
+            term =  "'"+remainder + '/' + fraction.d+"'";
+        } else {
+            term =  wholePart.toString() +" "+"'"+remainder + '/' + fraction.d+"'"; // 带分数情况
+        }
     }
-    var wholePart = Math.floor(fraction.n / fraction.d);
-    var remainder = fraction.n % fraction.d;
-
-    var sig = "";
+    
     if(fraction.s==-1){
-        sig = "-";
+        term = "(-"+term+")"
     }
-    var decimal = remainder/fraction.d;
-  
-    if (decimal === 0) {
-      return sig+wholePart.toString(); // 整数情况
-    }else if (showDecimal && (decimal==0.125||decimal==0.75||decimal==0.25||decimal==0.5||decimal==0.4||decimal==0.6||decimal==0.8)){
-        return sig+fraction.n / fraction.d;
-    } else if(wholePart==0) {
-        return sig+"'"+remainder + '/' + fraction.d+"'";
-    } else {
-        return sig+wholePart.toString() +" "+"'"+remainder + '/' + fraction.d+"'"; // 带分数情况
-    }
+    return term;
   }
   
+function fromMixedFraction(input:any){
+	if(input === null || input === undefined || input.trim() === ""){
+		return null;
+	}
+    //把带分数字符串换成规范的数字
+    if(typeof input === 'string' && input.includes("'")){
+        var num = input.trim().replace(/'([^']+)'/g, '$1').split(" ");
+        if(num.length==2){
+            //带分数12 3/4
+            var n = num[0],result,f=math.fraction(num[1]);
+            if(n[0][0]==="-"){
+                result = math.chain(n).multiply(-1).add(f).multiply(-1).done();
+            }else{
+                result = math.chain(n).add(f).done();
+            }
+            console.log(input,result,toMixedFraction(result,false))
+            return result
+        }
+		return math.fraction(num[0]);
+    }
+    return math.fraction(input);
+}
 
 function generateRandomFraction(min: number, max: number,fraction:boolean,factor=0): any {
     if(!fraction){
         return math.fraction(generateRandomNumber(min,max),1);
     }else{
-        // var n = generateRandomNumber(2,200)
-        // var factor = generateRandomNumber(2,10)
-        // var d = factor*generateRandomNumber(3,7);
+        // fixme 获取更友好的分数...
         if(factor<=1){
             factor = generateRandomNumber(2,10)*generateRandomNumber(2,10)
         }
@@ -79,7 +101,6 @@ function genNodeFromResult(result:any,minOP:number,maxOp:number,negative:boolean
             break;
         case 1: 
             var factor = getRandomFactor(result.d);
-            console.log("----",factor,result.n,result.d)
             if(negative){
                 left = generateRandomFraction(mainInt*-1-offset,mainInt+offset,fraction,factor);
             }else{
@@ -90,7 +111,7 @@ function genNodeFromResult(result:any,minOP:number,maxOp:number,negative:boolean
                 }
             }
             right = math.subtract(left,result);
-            term = toMixedFraction(left)+"-("+toMixedFraction(right)+")"
+            term = toMixedFraction(left)+"-"+toMixedFraction(right)
             break;
         case 2:
             if(!fraction){
@@ -98,9 +119,9 @@ function genNodeFromResult(result:any,minOP:number,maxOp:number,negative:boolean
                 right = math.divide(left);
             }else{
                 //(x1/x2)*(y1/y2)=a/b
-                const nfactor = getRandomFactor(result.n);
+                const nfactor = getRandomFactor(result.n) * generateRandomNumber(2,5);
                 const dfactor = getRandomFactor(result.d);
-                // console.log("****",result.n,result.d,nfactor,dfactor)
+                console.log("****",result.n,result.d,nfactor,dfactor)
                 left = math.fraction(nfactor,dfactor)
                 // right = math.fraction(result.n/nfactor,result.d/dfactor)
                 right = math.divide(result,left);
@@ -139,7 +160,6 @@ function genFormula(level:number,size:number) {
     if(level>3){
         //四年级后这里开始出现乘除、混合运算
         fraction = true;
-        minOP=2;
         if(level>6){
             //这里开始出现负数
             min=generateRandomNumber(-50,-10);
@@ -177,14 +197,16 @@ function genFormula(level:number,size:number) {
 
 
 function checkResult(correct:any,answer:any){
-	// console.log(typeof correct,correct,fromMixedFraction(correct))
-	// console.log(typeof answer,answer, fromMixedFraction(answer))
-    // var result = math.equal(fromMixedFraction(correct), fromMixedFraction(answer));
-	// if(result){
-	// 	return null;
-	// }else{
-	// 	return splitMixedFraction(correct);
-	// }
+	console.log(typeof correct,correct,fromMixedFraction(correct))
+	console.log(typeof answer,answer, fromMixedFraction(answer))
+    var result = math.equal(fromMixedFraction(correct), fromMixedFraction(answer));
+	if(result){
+		return null;
+	}else{
+        var fix = math.fix(correct)
+        var fraction = math.subtract(correct,fix)
+        return {"main":math.fix(correct).n,"n":fraction.n,"d":fraction.d}
+	}
 }
 
 const genQuestion = {
