@@ -121,7 +121,7 @@ function genNodeFromResult(result:any,minOP:number,maxOp:number,negative:boolean
                 //(x1/x2)*(y1/y2)=a/b
                 const nfactor = getRandomFactor(result.n) * generateRandomNumber(2,5);
                 const dfactor = getRandomFactor(result.d);
-                console.log("****",result.n,result.d,nfactor,dfactor)
+                // console.log("****",result.n,result.d,nfactor,dfactor)
                 left = math.fraction(nfactor,dfactor)
                 // right = math.fraction(result.n/nfactor,result.d/dfactor)
                 right = math.divide(result,left);
@@ -135,12 +135,20 @@ function genNodeFromResult(result:any,minOP:number,maxOp:number,negative:boolean
                     left  = math.multiply(result,right);
                 }
             }else{
-                const nfactor = getRandomFactor(result.n);
-                const dfactor = getRandomFactor(result.d);
-                // console.log("////",result.n,result.d,nfactor,dfactor)
-                left = math.fraction(nfactor,dfactor)
-                right = math.divide(left,result);
-                // right = math.fraction(result.d/dfactor,result.n/nfactor)
+                if(result.n==0){
+                    left = math.fraction(0,1)
+                    if(negative){
+                        right = generateRandomFraction(mainInt*-1-offset,mainInt+offset,fraction,13);
+                    }else{
+                        right = generateRandomFraction(Math.ceil(mainInt/2),mainInt,fraction,17);
+                    }
+                    console.log("////000000////000000",result,left,right)
+                }else{
+                    const nfactor = getRandomFactor(result.n);
+                    const dfactor = getRandomFactor(result.d);
+                    left = math.fraction(nfactor,dfactor)
+                    right = math.divide(left,result);
+                }
             }
             term = toMixedFraction(left)+"÷("+toMixedFraction(right)+")"
             break;
@@ -197,10 +205,13 @@ function genFormula(level:number,size:number) {
 
 
 function checkResult(correct:any,answer:any){
-	console.log(typeof correct,correct,fromMixedFraction(correct))
-	console.log(typeof answer,answer, fromMixedFraction(answer))
-	correct = math.fraction(correct);
-    var result = math.equal(correct, math.fraction(answer));
+	// console.log(typeof correct,correct,fromMixedFraction(correct))
+	// console.log(typeof answer,answer, fromMixedFraction(answer))
+    var result;
+    correct = math.fraction(correct);
+    if(typeof answer=="string" && answer.trim().length>0){
+        result = math.equal(correct, math.fraction(answer));
+    }
 	if(result){
 		return null;
 	}else{
