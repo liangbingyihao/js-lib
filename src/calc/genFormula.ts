@@ -193,6 +193,7 @@ function genFormula(level: number, size: number) {
         fraction = true;
         if (level > 6) {
             //这里开始出现负数
+            negative=true
             min = generateRandomNumber(-50, -10);
         }
         result = generateRandomFraction(min, max, fraction);
