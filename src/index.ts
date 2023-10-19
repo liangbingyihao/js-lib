@@ -10,3 +10,4 @@ var level=7,size=1,loop=1000;
 for(var i=0;i<loop;++i){
      calc.genFormula(level,size)
 }
+console.log(calc.checkResult("-0 1/5",'0 1/5'))
