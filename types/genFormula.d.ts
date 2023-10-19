@@ -7,8 +7,8 @@ declare function genFormula(level: number, size: number): {
     op: any;
 };
 declare function checkResult(correct: any, answer: any): {
-    main: any;
-    n: any;
+    main: number;
+    n: number;
     d: any;
 } | null;
 declare const genQuestion: {

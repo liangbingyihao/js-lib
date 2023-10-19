@@ -116,7 +116,7 @@ function genNodeFromResult(result:any,minOP:number,maxOp:number,negative:boolean
         case 2:
             if(!fraction){
                 left = math.fraction(getRandomFactor(mainInt),1)
-                right = math.divide(left);
+                right = math.divide(result,left);
             }else{
                 //(x1/x2)*(y1/y2)=a/b
                 const nfactor = getRandomFactor(result.n) * generateRandomNumber(2,5);
@@ -206,7 +206,7 @@ function checkResult(correct:any,answer:any){
 	}else{
         var fix = math.fix(correct)
         var fraction = math.subtract(correct,fix)
-        return {"main":fix.n,"n":fraction.n,"d":fraction.d}
+        return {"main":fix.n*fix.s,"n":fraction.n*fraction.s,"d":fraction.d}
 	}
 }
 
