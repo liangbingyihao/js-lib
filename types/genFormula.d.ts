@@ -4,7 +4,7 @@ declare function genFormula(level: number, size: number): {
     left: any;
     right: any;
     result: any;
-    op: any;
+    op: string | undefined;
 };
 declare function checkResult(correct: any, answer: any): {
     main: number;

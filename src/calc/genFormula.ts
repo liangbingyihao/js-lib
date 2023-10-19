@@ -84,13 +84,11 @@ function getRandomFactor(x: number) {
 
 function genNodeFromResult(result: any, minOP: number, maxOp: number, negative: boolean, fraction: boolean, max: any = null) {
     //从结果倒推式子
-
     //op:0+1-2*3/
     var op = generateRandomNumber(minOP, maxOp), mainInt = math.round(result).n, offset = Math.ceil(mainInt / 2);
     var left, right, term, opStr;
     switch (op) {
         case 0:
-            opStr = "+"
             var factor = getRandomFactor(result.d);
             if (negative) {
                 left = generateRandomFraction(mainInt * -1 - offset, mainInt + offset, fraction, factor);
@@ -98,7 +96,13 @@ function genNodeFromResult(result: any, minOP: number, maxOp: number, negative: 
                 left = generateRandomFraction(Math.ceil(mainInt / 2), mainInt, fraction, factor);
             }
             right = math.subtract(result, left);
-            term = toMixedFraction(left) + "+" + toMixedFraction(right)
+            if(right.s==-1&&!negative){
+                opStr = "-"
+                right = math.multiply(right,-1);
+            }else{
+                opStr = "+"
+            }
+            term = toMixedFraction(left) + opStr + toMixedFraction(right)
             break;
         case 1:
             opStr = "-"
@@ -113,7 +117,13 @@ function genNodeFromResult(result: any, minOP: number, maxOp: number, negative: 
                 }
             }
             right = math.subtract(left, result);
-            term = toMixedFraction(left) + "-" + toMixedFraction(right)
+            if(right.s==-1&&!negative){
+                opStr = "+"
+                right = math.multiply(right,-1);
+            }else{
+                opStr = "-"
+            }
+            term = toMixedFraction(left) + opStr + toMixedFraction(right)
             break;
         case 2:
             opStr = "×"
@@ -129,7 +139,12 @@ function genNodeFromResult(result: any, minOP: number, maxOp: number, negative: 
                 // right = math.fraction(result.n/nfactor,result.d/dfactor)
                 right = math.divide(result, left);
             }
-            term = toMixedFraction(left) + "×(" + toMixedFraction(right) + ")"
+            let rightTerm = toMixedFraction(right)
+            if(true||/^\(.+\)$/.test(rightTerm)){
+                term = toMixedFraction(left) + "×" + rightTerm
+            }else{
+                term = toMixedFraction(left) + "×(" + rightTerm + ")"
+            }
             break;
         case 3:
             opStr = "÷"
@@ -153,47 +168,17 @@ function genNodeFromResult(result: any, minOP: number, maxOp: number, negative: 
                     right = math.divide(left, result);
                 }
             }
-            term = toMixedFraction(left) + "÷(" + toMixedFraction(right) + ")"
+            rightTerm = toMixedFraction(right)
+            if(true||/^\(.+\)$/.test(rightTerm)){
+                term = toMixedFraction(left) + "÷" + rightTerm
+            }else{
+                term = toMixedFraction(left) + "÷(" + rightTerm + ")"
+            }
             break;
         default:
             break;
     }
     return { "term": term, "value": math.format(result, { fraction: 'ratio' }), "left": left, "right": right, "result": result, "op": opStr }
-}
-
-function genSubFormula(size: number, result: any, minOP: number, maxOP: number, negative: boolean, fraction: boolean, totalMax: any = null) {
-    // let formula = genNodeFromResult(result, minOP, maxOP, negative, fraction, totalMax);
-    // while (size > 1) {
-    //     var term;
-    //     if (size % 2) {
-    //         let subFormula =genNodeFromResult(formula.left, minOP, maxOP, negative, fraction, totalMax);
-    //         term = "(" + subFormula.term + ")" + formula.op + "(" + formula.right.term + ")"
-
-    //         formula ={ "term": term, "value": math.format(result, { fraction: 'ratio' }), 
-    //         "left": subFormula, "right": formula.right, "result": result, "op": formula.op }
-    //     }else{
-    //         let subFormula =genNodeFromResult(formula.right, minOP, maxOP, negative, fraction, totalMax);
-    //         term = "(" + formula.left + ")" + formula.op + "(" + subFormula.term + ")"
-
-    //         formula ={ "term": term, "value": math.format(result, { fraction: 'ratio' }), 
-    //         "left": formula.left, "right": subFormula, "result": result, "op": formula.op }
-    //     }
-    //     --size;
-    // }
-    if (size > 2) {
-        //混合运算分治方案，获得更多子项
-        console.log("result", result);
-        var node = genNodeFromResult(result, 0, 2, negative, fraction, totalMax);
-        console.log("1/2", node);
-        var left = genNodeFromResult(node.left, minOP, maxOP, negative, fraction, totalMax);
-        console.log("1/4", left);
-        var right = genNodeFromResult(node.right, minOP, maxOP, negative, fraction, totalMax);
-        console.log("1/4", right);
-        var term = "(" + left.term + ")" + node.op + "(" + right.term + ")"
-        return { "term": term, "value": math.format(result, { fraction: 'ratio' }), "left": left, "right": right, "result": result, "op": node.op }
-    } else {
-        return genNodeFromResult(result, minOP, maxOP, negative, fraction, totalMax);
-    }
 }
 
 function genFormula(level: number, size: number) {
