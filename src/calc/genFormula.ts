@@ -125,6 +125,7 @@ function genNodeFromResult(result: any, minOP: number, maxOp: number, negative: 
             term = toMixedFraction(left) + opStr + toMixedFraction(right)
             break;
         case 2:
+            opStr = "×"
             if (!fraction) {
                 left = math.fraction(getRandomFactor(mainInt), 1)
                 right = math.divide(result, left);
