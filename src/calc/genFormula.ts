@@ -105,7 +105,6 @@ function genNodeFromResult(result: any, minOP: number, maxOp: number, negative: 
             term = toMixedFraction(left) + opStr + toMixedFraction(right)
             break;
         case 1:
-            opStr = "-"
             var factor = getRandomFactor(result.d);
             if (negative) {
                 left = generateRandomFraction(mainInt * -1 - offset, mainInt + offset, fraction, factor);
@@ -126,7 +125,6 @@ function genNodeFromResult(result: any, minOP: number, maxOp: number, negative: 
             term = toMixedFraction(left) + opStr + toMixedFraction(right)
             break;
         case 2:
-            opStr = "×"
             if (!fraction) {
                 left = math.fraction(getRandomFactor(mainInt), 1)
                 right = math.divide(result, left);
@@ -199,7 +197,7 @@ function genFormula(level: number, size: number) {
         result = generateRandomFraction(min, max, fraction);
     } else if (level < 3) {
         //低幼版，不要混合运算了
-        size = 1;
+        // size = 1;
         //2:加减,4:加减乘除
         maxOP = 2;
         if (level <= 1) {
@@ -213,14 +211,20 @@ function genFormula(level: number, size: number) {
         result = generateRandomFraction(min, max, fraction);
     } else {
         //专门考乘除
-        minOP = 2, min = 2, max = 10, size = 1;
+        minOP = 2, min = 2, max = 10;
         totalMax = 10;
         result = generateRandomFraction(min, max, fraction);
     }
     if (size > 1) {
         //分治方案，获得更多项
         // console.log("result", result);
-        var node = genNodeFromResult(result, 0, 2, negative, fraction, totalMax);
+        var node;
+        if(level==3){
+            //专门搞一个版本是连乘连除的
+            node = genNodeFromResult(result, minOP, maxOP, negative, fraction, totalMax);
+        }else{
+            node = genNodeFromResult(result, 0, 2, negative, fraction, totalMax);
+        }
         // console.log("1/2", node);
         var left = genNodeFromResult(node.left, minOP, maxOP, negative, fraction, totalMax);
         // console.log("1/4", left);
@@ -239,6 +243,30 @@ function genFormula(level: number, size: number) {
     // }
 }
 
+function splitMixedFraction(fraction: any) {
+    var result = { "main": "", "n": "", "d": "" }
+    if (fraction == null || fraction == undefined) {
+        return result;
+    }
+    if (fraction.d == 0) {
+        result["main"] = fraction.n;
+    } else {
+        let wholePart = Math.floor(fraction.n / fraction.d);
+        let remainder = fraction.n % fraction.d;
+
+        result["main"] = wholePart == 0 && remainder != 0 ? "" : wholePart.toString();
+        result["n"] = remainder == 0 ? "" : remainder.toString();
+        result["d"] = fraction.d.toString();
+
+    }
+
+    if(fraction.s == -1){
+        result["main"] = "-"+result["main"]
+    }
+
+    return result;
+
+}
 
 
 function checkResult(correct: any, answer: any) {
@@ -252,9 +280,7 @@ function checkResult(correct: any, answer: any) {
     if (result) {
         return null;
     } else {
-        var fix = math.fix(correct)
-        var fraction = math.subtract(correct, fix)
-        return { "main": fix.n * fix.s, "n": fraction.n * fraction.s, "d": fraction.d }
+        return splitMixedFraction(correct);
     }
 }
 
