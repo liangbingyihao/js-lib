@@ -206,7 +206,7 @@ function genFormula(level: number, size: number) {
         //四年级后这里开始出现乘除、混合运算
         fraction = true;
         if (level > 6) {
-            maxOP = 2;
+            // maxOP = 2;
             //这里开始出现负数
             negative = true
             min = generateRandomNumber(-50, -10);
