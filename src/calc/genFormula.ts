@@ -1,38 +1,31 @@
 const math = require('mathjs');
+import { toMixedFraction } from './common'
+
+function isPrime(num: number) {
+    if (num <= 1) {
+        return false;
+    }
+    if (num <= 3) {
+        return true;
+    }
+    if (num % 2 === 0 || num % 3 === 0) {
+        return false;
+    }
+
+    for (let i = 5; i * i <= num; i += 6) {
+        if (num % i === 0 || num % (i + 2) === 0) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 
 function generateRandomNumber(min: number, max: number): any {
     return Math.floor(Math.random() * (max - min) + min);
 }
 
-function toMixedFraction(fraction: any, showDecimal: boolean = false) {
-    //把数字转换成用户能看懂的带分数
-    if (fraction == null || fraction == undefined) {
-        return "";
-    }
-    var term;
-    if (fraction.d == 0) {
-        term = fraction.n;
-    } else {
-        var wholePart = Math.floor(fraction.n / fraction.d);
-        var remainder = fraction.n % fraction.d;
-        var decimal = remainder / fraction.d;
-
-        if (decimal === 0) {
-            term = wholePart.toString(); // 整数情况
-        } else if (showDecimal && (decimal == 0.125 || decimal == 0.75 || decimal == 0.25 || decimal == 0.5 || decimal == 0.4 || decimal == 0.6 || decimal == 0.8)) {
-            term = fraction.n / fraction.d;
-        } else if (wholePart == 0) {
-            term = "'" + remainder + '/' + fraction.d + "'";
-        } else {
-            term = wholePart.toString() + " " + "'" + remainder + '/' + fraction.d + "'"; // 带分数情况
-        }
-    }
-
-    if (fraction.s == -1) {
-        term = "(-" + term + ")"
-    }
-    return term;
-}
 
 function fromMixedFraction(input: any) {
     if (input === null || input === undefined || input.trim() === "") {
@@ -85,6 +78,9 @@ function getRandomFactor(x: number) {
 function genNodeFromResult(result: any, minOP: number, maxOp: number, negative: boolean, fraction: boolean, max: any = null) {
     //从结果倒推式子
     //op:0+1-2*3/
+    if (isPrime(result.n) && minOP == 2) {
+        minOP = 3;
+    }
     var op = generateRandomNumber(minOP, maxOp), mainInt = math.round(result).n, offset = Math.ceil(mainInt / 2);
     var left, right, term, opStr;
     switch (op) {
@@ -96,13 +92,13 @@ function genNodeFromResult(result: any, minOP: number, maxOp: number, negative: 
                 left = generateRandomFraction(Math.ceil(mainInt / 2), mainInt, fraction, factor);
             }
             right = math.subtract(result, left);
-            if(right.s==-1&&!negative){
+            if (right.s == -1 && !negative) {
                 opStr = "-"
-                right = math.multiply(right,-1);
-            }else{
+                right = math.multiply(right, -1);
+            } else {
                 opStr = "+"
             }
-            term = toMixedFraction(left) + opStr + toMixedFraction(right)
+            term = toMixedFraction(left, true) + opStr + toMixedFraction(right, true)
             break;
         case 1:
             var factor = getRandomFactor(result.d);
@@ -116,13 +112,13 @@ function genNodeFromResult(result: any, minOP: number, maxOp: number, negative: 
                 }
             }
             right = math.subtract(left, result);
-            if(right.s==-1&&!negative){
+            if (right.s == -1 && !negative) {
                 opStr = "+"
-                right = math.multiply(right,-1);
-            }else{
+                right = math.multiply(right, -1);
+            } else {
                 opStr = "-"
             }
-            term = toMixedFraction(left) + opStr + toMixedFraction(right)
+            term = toMixedFraction(left, true) + opStr + toMixedFraction(right, true)
             break;
         case 2:
             opStr = "×"
@@ -139,19 +135,27 @@ function genNodeFromResult(result: any, minOP: number, maxOp: number, negative: 
                 right = math.divide(result, left);
             }
             let rightTerm = toMixedFraction(right)
-            if(true||/^\(.+\)$/.test(rightTerm)){
-                term = toMixedFraction(left) + "×" + rightTerm
-            }else{
-                term = toMixedFraction(left) + "×(" + rightTerm + ")"
+            if (true || /^\(.+\)$/.test(rightTerm)) {
+                term = toMixedFraction(left, true) + "×" + rightTerm
+            } else {
+                term = toMixedFraction(left, true) + "×(" + rightTerm + ")"
             }
             break;
         case 3:
             opStr = "÷"
             if (!fraction) {
-                if (max != null) {
-                    right = math.fraction(generateRandomNumber(2, max), 1);
-                    left = math.multiply(result, right);
+                if (max == null || max == undefined) {
+                    // console.log("*****",max,result);
+                    max = 10000;
                 }
+                // if(result==null||result.n==0){
+                //     return null;
+                // }
+                right = math.fraction(generateRandomNumber(2, Math.floor(max / result.n)), 1);
+                if (right.n == 1) {
+                    console.log("???", max, result.n)
+                }
+                left = math.multiply(result, right);
             } else {
                 if (result.n == 0) {
                     left = math.fraction(0, 1)
@@ -167,11 +171,11 @@ function genNodeFromResult(result: any, minOP: number, maxOp: number, negative: 
                     right = math.divide(left, result);
                 }
             }
-            rightTerm = toMixedFraction(right)
-            if(true||/^\(.+\)$/.test(rightTerm)){
-                term = toMixedFraction(left) + "÷" + rightTerm
-            }else{
-                term = toMixedFraction(left) + "÷(" + rightTerm + ")"
+            rightTerm = toMixedFraction(right, true)
+            if (true || /^\(.+\)$/.test(rightTerm)) {
+                term = toMixedFraction(left, true) + "÷" + rightTerm
+            } else {
+                term = toMixedFraction(left, true) + "÷(" + rightTerm + ")"
             }
             break;
         default:
@@ -179,6 +183,17 @@ function genNodeFromResult(result: any, minOP: number, maxOp: number, negative: 
     }
     return { "term": term, "value": math.format(result, { fraction: 'ratio' }), "left": left, "right": right, "result": result, "op": opStr }
 }
+
+// function confuse(formula: any) {
+//     //把式子搞复杂点
+//     let opStrList = ["÷", "×"];
+//     if (formula.op == "÷" && opStrList.indexOf(formula.left.op) >= 0 && opStrList.indexOf(formula.right.op) >= 0) {
+//         //全部都是*/的情况
+//     }
+//     return formula;
+
+// }
+
 
 function genFormula(level: number, size: number) {
     // <option value="1">学前(10以内)</option>
@@ -191,8 +206,9 @@ function genFormula(level: number, size: number) {
         //四年级后这里开始出现乘除、混合运算
         fraction = true;
         if (level > 6) {
+            maxOP = 2;
             //这里开始出现负数
-            negative=true
+            negative = true
             min = generateRandomNumber(-50, -10);
         }
         result = generateRandomFraction(min, max, fraction);
@@ -212,18 +228,19 @@ function genFormula(level: number, size: number) {
         result = generateRandomFraction(min, max, fraction);
     } else {
         //专门考乘除
-        minOP = 2, min = 2, max = 10;
-        totalMax = 10;
+        minOP = 2, min = 2, max = 20;
+        totalMax = 100;
         result = generateRandomFraction(min, max, fraction);
     }
     if (size > 1) {
         //分治方案，获得更多项
         // console.log("result", result);
         var node;
-        if(level==3){
+        if (level == 3) {
             //专门搞一个版本是连乘连除的
-            node = genNodeFromResult(result, minOP, maxOP, negative, fraction, totalMax);
-        }else{
+            // console.log("size>1",result,totalMax)
+            node = genNodeFromResult(result, minOP, maxOP, negative, fraction, 50);
+        } else {
             node = genNodeFromResult(result, 0, 2, negative, fraction, totalMax);
         }
         // console.log("1/2", node);
@@ -244,7 +261,8 @@ function genFormula(level: number, size: number) {
     // }
 }
 
-function splitMixedFraction(fraction: any) {
+function splitMixedFractionStr(fraction: any) {
+    //-7/2->-3 1/2
     var result = { "main": "", "n": "", "d": "" }
     if (fraction == null || fraction == undefined) {
         return result;
@@ -261,8 +279,8 @@ function splitMixedFraction(fraction: any) {
 
     }
 
-    if(fraction.s == -1){
-        result["main"] = "-"+result["main"]
+    if (fraction.s == -1) {
+        result["main"] = "-" + result["main"]
     }
 
     return result;
@@ -281,7 +299,7 @@ function checkResult(correct: any, answer: any) {
     if (result) {
         return null;
     } else {
-        return splitMixedFraction(correct);
+        return splitMixedFractionStr(correct);
     }
 }
 
@@ -291,4 +309,4 @@ const genQuestion = {
 }
 
 export default genQuestion
-export { genFormula, checkResult }
+export { genFormula, checkResult}
