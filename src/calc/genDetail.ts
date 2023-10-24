@@ -25,26 +25,32 @@ function getAdditionItems(formula: any, s: number, output: number[]) {
             s = -s;
         }
         getAdditionItems(formula.right, s, output)
-    } else if(["÷","×"].indexOf(formula.op)>=0) {
-        var output2: number[] = []
-        getMultiplyItems(formula,output2);
     } else {
         splitMixedFraction(math.multiply(formula, s), output);
     }
 }
 
-function getMultiplyItems(formula: any, output: number[]) {
+function getMultiplyItems(formula: any) {
     //获取+/-的元素
+    var output: any[] = []
     if (["÷","×"].indexOf(formula.op)>=0&&formula.left != undefined && formula.right != undefined) {
-        getMultiplyItems(formula.left, output)
-        getMultiplyItems(formula.right, output)
+        let o = getMultiplyItems(formula.left)
+        o.forEach(element => {
+            output.push(element)
+        });
+        output.push(formula.op)
+        o = getMultiplyItems(formula.right)
+        o.forEach(element => {
+            output.push(element)
+        });
+        output.push("="+formula.value);
     } else if(["+","-"].indexOf(formula.op)>=0) {
         var output2: number[] = []
         getAdditionItems(formula,1,output2);
     } else {
-        console.log("...",formula);
         output.push(formula);
     }
+    return output;
 }
 
 
@@ -62,15 +68,30 @@ function getIntegersProcess(integers: number[]) {
             return 0; // 顺序无关
         }
     });
+    // var process = [integers]
+    // while(integers.length>1){
+    //     console.log(integers.length)
+    //     var tmp=[integers[0]+integers[1]]
+    //     integers = tmp.concat(integers.slice(2))
+    //     process.push(integers)
+    // }
     console.log("IntegersProcess ,got " + total, integers.map((element) => toMixedFraction(element)))
 }
 
-function getNextSimilarly(input: any[]): any[] {
+function getNextSimilarly(input: any[],process:any[]): any {
     let maxi = 0, maxj = 0, similar = 0;
     for (let i = 0; i < input.length; ++i) {
+        let left = input[i]
+        if(left.d==1){
+            continue
+        }
         for (let j = i+1; j < input.length; ++j) {
-            let s = math.lcm(input[i].d, input[j].d)
-            s = s * s / (input[i].d * input[j].d)
+            let right = input[j]
+            if(right.d==1){
+                continue
+            }
+            let s = math.lcm(left.d, right.d)
+            s = s * s / (left.d * right.d)
             if (s <= similar||similar==0) {
                 maxi = i;
                 maxj = j;
@@ -85,45 +106,59 @@ function getNextSimilarly(input: any[]): any[] {
         }
     }
     if (maxi != maxj) {
-        var result = [math.add(input[maxi], input[maxj])]
+        var result = []
         for (let i = 0; i < input.length; ++i) {
             if (i != maxi && i != maxj) {
                 result.push(input[i])
             }
         }
-        return result;
+        process.push(simplfyAddition([input[maxi], input[maxj]].concat(result)));
+        result.unshift(math.add(input[maxi], input[maxj]));
+        process.push(simplfyAddition(result))
+        return result
     } else {
-        return input;
+        let result = [input.reduce((accumulator, currentValue) => math.add(accumulator, currentValue), 0)];
+        process.push(simplfyAddition(result))
+        return result;
     }
 
 }
 
-function getFractionsProcess(fractions: any[]) {
+function getFractionsProcess(fractions: any[]){
+    var process:any=[]
     let total = fractions.reduce((accumulator, currentValue) => math.add(accumulator, currentValue), 0);
     // math.format(total, { fraction: 'ratio' })
     let similar = 0;
-    console.log("FractionsProcess, start:" + fractions.map((element) => toMixedFraction(element)))
+    // console.log("FractionsProcess, start:" + fractions.map((element) => toMixedFraction(element)))
+    process.push(simplfyAddition(fractions))
     while (fractions.length>1) {
-        fractions = getNextSimilarly(fractions);
+        fractions = getNextSimilarly(fractions,process);
         ++similar;
-        console.log("FractionsProcess, " + similar + " got:" + fractions.map((element) => toMixedFraction(element)))
+        // console.log("FractionsProcess, " + similar + " got:" + fractions.map((element) => toMixedFraction(element)))
     }
-    console.log("FractionsProcess,got " + math.format(total, { fraction: 'ratio' }))
+    // process.push(simplfyAddition(fractions));
+    return process;
+    // console.log("FractionsProcess,got " + math.format(total, { fraction: 'ratio' }))
+}
+
+function simplfyAddition(numbers:any[]){
+    return numbers.map((element) => toMixedFraction(element)).join("+").replace(/[\(\)']/g,"").replace(/\+-/g,"-")
 }
 
 function getAdditionProcess(formula: any) {
-    //获取对人友好的运算过程
+    //一般纯加减运算模式的运算运算过程
     var output: number[] = []
     var pending: any[] = []
     getAdditionItems(formula, 1, output)
-
-    console.log("Process1", output.map((element) => toMixedFraction(element)))
-    console.log("pending", pending)
-
-    // let integers = output.filter((number) => math.abs(number) >= 1);
-    // let fractions = output.filter((number) => math.abs(number) < 1);
-    // getIntegersProcess(integers);
-    // getFractionsProcess(fractions)
+    var process = []
+    process.push(simplfyAddition(output))
+    let integers = output.filter((number) => math.abs(number) >= 1);
+    let fractions = output.filter((number) => math.abs(number) < 1);
+    process.push(simplfyAddition(integers.concat(fractions)))
+    let total = integers.reduce((accumulator, currentValue) => math.add(accumulator, currentValue), 0);
+    process.push(simplfyAddition([total].concat(fractions)))
+    process= process.concat(getFractionsProcess([total].concat(fractions)))
+    console.log(process.join("\n="))
 }
 
 

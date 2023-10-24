@@ -6,7 +6,7 @@ import calc from './calc'
 // console.log(calc.genFormula(3,1))
 // console.log(calc.genFormula(4,1))
 // console.log(calc.checkResult("17/5",'0 17/5'))
-var level=3,size=2,loop=1;
+var level=7,size=2,loop=1;
 for(var i=0;i<loop;++i){
      var result = calc.genFormula(level,size)
      console.log(result);
