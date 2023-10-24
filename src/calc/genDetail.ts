@@ -17,20 +17,36 @@ function splitMixedFraction(mixedFraction: any, output: any[]) {
 }
 
 
-function getAdditionItems(formula: any, s: number, output: number[],pending:any[]) {
+function getAdditionItems(formula: any, s: number, output: number[]) {
     //获取+/-的元素
     if (["+","-"].indexOf(formula.op)>=0&&formula.left != undefined && formula.right != undefined) {
-        getAdditionItems(formula.left, s, output,pending)
+        getAdditionItems(formula.left, s, output)
         if (formula.op == "-") {
             s = -s;
         }
-        getAdditionItems(formula.right, s, output,pending)
+        getAdditionItems(formula.right, s, output)
     } else if(["÷","×"].indexOf(formula.op)>=0) {
-        pending.push(formula);
+        var output2: number[] = []
+        getMultiplyItems(formula,output2);
     } else {
         splitMixedFraction(math.multiply(formula, s), output);
     }
 }
+
+function getMultiplyItems(formula: any, output: number[]) {
+    //获取+/-的元素
+    if (["÷","×"].indexOf(formula.op)>=0&&formula.left != undefined && formula.right != undefined) {
+        getMultiplyItems(formula.left, output)
+        getMultiplyItems(formula.right, output)
+    } else if(["+","-"].indexOf(formula.op)>=0) {
+        var output2: number[] = []
+        getAdditionItems(formula,1,output2);
+    } else {
+        console.log("...",formula);
+        output.push(formula);
+    }
+}
+
 
 function getIntegersProcess(integers: number[]) {
     // 使用自定义排序函数进行排序
@@ -99,15 +115,15 @@ function getAdditionProcess(formula: any) {
     //获取对人友好的运算过程
     var output: number[] = []
     var pending: any[] = []
-    getAdditionItems(formula, 1, output,pending)
+    getAdditionItems(formula, 1, output)
 
     console.log("Process1", output.map((element) => toMixedFraction(element)))
     console.log("pending", pending)
 
-    let integers = output.filter((number) => math.abs(number) >= 1);
-    let fractions = output.filter((number) => math.abs(number) < 1);
-    getIntegersProcess(integers);
-    getFractionsProcess(fractions)
+    // let integers = output.filter((number) => math.abs(number) >= 1);
+    // let fractions = output.filter((number) => math.abs(number) < 1);
+    // getIntegersProcess(integers);
+    // getFractionsProcess(fractions)
 }
 
 
