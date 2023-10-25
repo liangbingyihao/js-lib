@@ -29,4 +29,9 @@ function toMixedFraction(fraction: any, showDecimal: boolean = false) {
     return term;
 }
 
-export { toMixedFraction}
+
+function generateRandomNumber(min: number, max: number): any {
+    return Math.floor(Math.random() * (max - min) + min);
+}
+
+export { toMixedFraction,generateRandomNumber}
