@@ -1,7 +1,7 @@
-import { number } from "mathjs";
-import { generateRandomNumber, generateRandomFraction } from './common'
+const math = require('mathjs');
+import { generateRandomNumber, genNodeFromResult } from './common'
 
-const variableName = ["x", "y", "z", "m", "n", "a", "b"]
+const variableName = ["1", "x", "y", "z"]
 
 // 从数组中随机选择n个元素
 function getRandomElements(array: any[], n: number) {
@@ -19,14 +19,17 @@ function getRandomElements(array: any[], n: number) {
     return randomElements;
 }
 
+
 function multiplyByNames(names1: any[], names2: any[]): any[] {
     var result: any[] = []
-    names1.forEach(e1 => {
-        names2.forEach(e2 => {
-            result.push(e1.concat(e2))
-        });
-        return e1;
-    });
+    for (let i = 0; i < names1.length; ++i) {
+
+        for (let j = 0; j < names2.length; ++j) {
+            if (names2[j] >= names1[i]) {
+                result.push(names1[i] + names2[j])
+            }
+        }
+    }
     return result;
 }
 
@@ -38,43 +41,14 @@ function getNames(cntVariable: number, cntDegree: number) {
     if (cntDegree <= 0) {
         cntDegree = 1;
     }
-    let names = variableName.slice(0, cntVariable);
-    // let questions = [],cntMaxNumberOfVariable=Math.min(cntVariable,cntDegree)
-    // for (let i = 0; i < cntDegree; ++i) {
-    //     questions.push(names[generateRandomNumber(0, cntMaxNumberOfVariable)])
-    // }
-    var result: any = names.map(function (e) {
-        return [e];
-    });
+    let names = variableName.slice(0, cntVariable + 1);
 
-    while (cntDegree > 1) {
-        result = multiplyByNames(result, names)
-        --cntDegree;
+    var result: string[] = names;
+    for (let i = 1; i < cntDegree; ++i) {
+        result = multiplyByNames(names, result)
     }
-    var displayNames = result.map(function (names: any[]) {
-        return names.join("");
-    })
-    var coreNames = result.map(function (names: any[]) {
-        return names.sort().join("");
-    })
-    coreNames = [...new Set(coreNames)]
-    return { "core": coreNames, "display": displayNames }
-}
-
-function getNames2(cntVariable: number, cntDegree: number) {
-    //获取多项式所有可能的变量
-    if (cntVariable <= 0) {
-        cntVariable = 1;
-    }
-    if (cntDegree <= 0) {
-        cntDegree = 1;
-    }
-    let names = variableName.slice(0, cntVariable);
-
-    var result = []
-    for(let i=0;i<cntDegree;++i){
-
-    }
+    result = result.map((element) => element.replace(/1/g, ""))
+    return result
 
 }
 function getCoefficients(coreNames: string[]) {
@@ -83,14 +57,22 @@ function getCoefficients(coreNames: string[]) {
         if (c != 0) {
             c += generateRandomNumber(1, 3)
         }
-        return c
+        if (c == 0) {
+            return genNodeFromResult(math.fraction(c, 1), 0, 1, true, true, 50);
+        } else {
+            return genNodeFromResult(math.fraction(c, 1), 0, 3, true, true, 50);
+        }
     })
+
 }
+
 
 function genPolynomial(cntVariable: number, cntDegree: number) {
     let names = getNames(cntVariable, cntDegree)
+    let coefficients = getCoefficients(names);
 
-    return {"names":names,"coefficients":getCoefficients(names.core)};
+
+    return { "names": names, "coefficients": getCoefficients(names) };
 }
 
 export { genPolynomial }
