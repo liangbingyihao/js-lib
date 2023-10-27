@@ -1,3 +1,4 @@
+const math = require('mathjs');
 
 function toMixedFraction(fraction: any, showDecimal: boolean = false) {
     //把数字转换成用户能看懂的带分数
@@ -34,4 +35,18 @@ function generateRandomNumber(min: number, max: number): any {
     return Math.floor(Math.random() * (max - min) + min);
 }
 
-export { toMixedFraction,generateRandomNumber}
+
+function generateRandomFraction(min: number, max: number, fraction: boolean, factor = 0): any {
+    if (!fraction) {
+        return math.fraction(generateRandomNumber(min, max), 1);
+    } else {
+        // fixme 获取更友好的分数...
+        if (factor <= 1) {
+            factor = generateRandomNumber(2, 10) * generateRandomNumber(2, 10)
+        }
+        return math.fraction(generateRandomNumber(min, 150), factor);
+    }
+}
+
+
+export { toMixedFraction,generateRandomNumber,generateRandomFraction}

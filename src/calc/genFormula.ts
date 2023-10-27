@@ -1,5 +1,5 @@
 const math = require('mathjs');
-import { toMixedFraction } from './common'
+import { toMixedFraction,generateRandomFraction } from './common'
 
 function isPrime(num: number) {
     if (num <= 1) {
@@ -50,19 +50,8 @@ function fromMixedFraction(input: any) {
     return math.fraction(input);
 }
 
-function generateRandomFraction(min: number, max: number, fraction: boolean, factor = 0): any {
-    if (!fraction) {
-        return math.fraction(generateRandomNumber(min, max), 1);
-    } else {
-        // fixme 获取更友好的分数...
-        if (factor <= 1) {
-            factor = generateRandomNumber(2, 10) * generateRandomNumber(2, 10)
-        }
-        return math.fraction(generateRandomNumber(min, 150), factor);
-    }
-}
-
 function getRandomFactor(x: number) {
+    //获取一个随机因数
     const factors = [], offset = Math.ceil(x / 2) + 1;
     for (let i = 2; i < offset; i++) {
         if (x % i === 0) {
