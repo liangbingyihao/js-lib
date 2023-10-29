@@ -42,9 +42,9 @@ function generateRandomFraction(min: number, max: number, fraction: boolean, fac
     } else {
         // fixme 获取更友好的分数...
         if (factor <= 1) {
-            factor = generateRandomNumber(2, 10) * generateRandomNumber(2, 10)
+            factor = generateRandomNumber(2, 10) * generateRandomNumber(2, 7)
         }
-        return math.fraction(generateRandomNumber(min, 150), factor);
+        return math.fraction(generateRandomNumber(min, 80), factor);
     }
 }
 
@@ -193,5 +193,20 @@ function genNodeFromResult(result: any, minOP: number, maxOp: number, negative: 
     return { "term": term, "value": math.format(result, { fraction: 'ratio' }), "left": left, "right": right, "result": result, "op": opStr }
 }
 
+function shuffleString(inputString:string) {
+    // 将字符串转换为字符数组
+    const charArray = inputString.split('');
+    const n = charArray.length;
+  
+    // Fisher-Yates 随机化算法
+    for (let i = n - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [charArray[i], charArray[j]] = [charArray[j], charArray[i]];
+    }
+  
+    // 将字符数组重新组合成字符串
+    const shuffledString = charArray.join('');
+    return shuffledString;
+  }
 
-export { toMixedFraction,generateRandomNumber,generateRandomFraction,genNodeFromResult}
+export { toMixedFraction,generateRandomNumber,generateRandomFraction,genNodeFromResult,shuffleString}

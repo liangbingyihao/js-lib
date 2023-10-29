@@ -1,5 +1,5 @@
 const math = require('mathjs');
-import { generateRandomNumber, genNodeFromResult } from './common'
+import { generateRandomNumber, genNodeFromResult, toMixedFraction, shuffleString } from './common'
 
 const variableName = ["1", "x", "y", "z"]
 
@@ -48,31 +48,61 @@ function getNames(cntVariable: number, cntDegree: number) {
         result = multiplyByNames(names, result)
     }
     result = result.map((element) => element.replace(/1/g, ""))
-    return result
+    return result.sort((e1, e2) => e2.length - e1.length)
 
 }
-function getCoefficients(coreNames: string[]) {
-    return coreNames.map((element) => {
-        let c = generateRandomNumber(-3, 4) * generateRandomNumber(2, 5)
-        if (c != 0) {
-            c += generateRandomNumber(1, 3)
+
+function getCoefficients(coreNames: string[], cntDegree: number) {
+    let first = true, c = 0;
+    let coefficients = coreNames.map((element) => {
+        if (first) {
+            first = false;
+            c = generateRandomNumber(1, 4) * generateRandomNumber(2, 3);
+        } else {
+            let r = generateRandomNumber(1, 3)
+            if (r == 2) {
+                c = 0;
+            } else {
+                c = generateRandomNumber(-3, 4) * generateRandomNumber(2, 5) + r
+            }
         }
         if (c == 0) {
-            return genNodeFromResult(math.fraction(c, 1), 0, 1, true, true, 50);
+            return genNodeFromResult(math.fraction(c, 1), 0, 1, true, false, 50);
         } else {
-            return genNodeFromResult(math.fraction(c, 1), 0, 3, true, true, 50);
+            return genNodeFromResult(math.fraction(c, 1), 0, 1, true, false, 50);
         }
     })
+    return coefficients;
+}
+
+function getPolynomial(coreNames: string[], coefficients: string[]) {
+    var result = []
+    for (let i = 0; i < coreNames.length; ++i) {
+        let cs: any = coefficients[i];
+
+        if (!math.equal(cs.left, 0)) {
+            result.push(toMixedFraction(cs.left) + shuffleString(coreNames[i]))
+        }
+        if (!math.equal(cs.right, 0)) {
+            if (cs.op == "-") {
+                result.push(toMixedFraction(math.multiply(-1, cs.right)) + shuffleString(coreNames[i]))
+            } else {
+                result.push(toMixedFraction(cs.right) + shuffleString(coreNames[i]))
+            }
+        }
+    }
+    return result.join("+");
 
 }
 
 
 function genPolynomial(cntVariable: number, cntDegree: number) {
     let names = getNames(cntVariable, cntDegree)
-    let coefficients = getCoefficients(names);
+    let coefficients: any[] = getCoefficients(names, cntDegree);
+    let polynomial = getPolynomial(names, coefficients);
 
 
-    return { "names": names, "coefficients": getCoefficients(names) };
+    return { "names": names, "coefficients": coefficients, "polynomial": polynomial };
 }
 
 export { genPolynomial }
