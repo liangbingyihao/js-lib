@@ -10,4 +10,14 @@ declare function genNodeFromResult(result: any, minOP: number, maxOp: number, ne
     op: string | undefined;
 };
 declare function shuffleString(inputString: string): string;
-export { toMixedFraction, generateRandomNumber, generateRandomFraction, genNodeFromResult, shuffleString };
+declare function replaceWithExponents(inputString: string): string;
+declare const commont: {
+    toMixedFraction: typeof toMixedFraction;
+    generateRandomNumber: typeof generateRandomNumber;
+    generateRandomFraction: typeof generateRandomFraction;
+    genNodeFromResult: typeof genNodeFromResult;
+    shuffleString: typeof shuffleString;
+    replaceWithExponents: typeof replaceWithExponents;
+};
+export default commont;
+export { toMixedFraction, generateRandomNumber, generateRandomFraction, genNodeFromResult, shuffleString, replaceWithExponents };
