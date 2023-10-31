@@ -9,6 +9,7 @@ declare function genNodeFromResult(result: any, minOP: number, maxOp: number, ne
     result: any;
     op: string | undefined;
 };
+declare function shuffleList(input: any[]): void;
 declare function shuffleString(inputString: string): string;
 declare function replaceWithExponents(inputString: string): string;
 declare const commont: {
@@ -18,6 +19,7 @@ declare const commont: {
     genNodeFromResult: typeof genNodeFromResult;
     shuffleString: typeof shuffleString;
     replaceWithExponents: typeof replaceWithExponents;
+    shuffleList: typeof shuffleList;
 };
 export default commont;
 export { toMixedFraction, generateRandomNumber, generateRandomFraction, genNodeFromResult, shuffleString, replaceWithExponents };

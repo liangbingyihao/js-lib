@@ -55,6 +55,7 @@ function getNames(cntVariable: number, cntDegree: number) {
 function getCoefficients(coreNames: string[], cntDegree: number) {
     let meanNames = getRandomElements(coreNames.slice(1), Math.min(2, coreNames.length))
     meanNames.push(coreNames[0]);
+    var answer:string[]=[]
     let coefficients = coreNames.map((element) => {
         if (meanNames.indexOf(element) >= 0) {
             let c = math.fraction(common.generateRandomNumber(1, 4) * common.generateRandomNumber(2, 5)
@@ -62,13 +63,18 @@ function getCoefficients(coreNames: string[], cntDegree: number) {
             if(common.generateRandomNumber(1, 3)==1){
                 c = math.multiply(c,-1);
             }
+            let c_str = common.toMixedFraction(c).replace(/[()]/g, '')
+            if(c_str[0]!="-"){
+                c_str="+"+c_str
+            }
+            answer.push(c_str+element)
             return common.genNodeFromResult(c, 0, 1, true, false, 50);
         }else{
             return 0;
         }
 
     })
-    return coefficients;
+    return {"coefficients":coefficients,"answer":common.replaceWithExponents(answer.join("").slice(1))};
 }
 
 function getPolynomial(coreNames: string[], coefficients: string[]) {
@@ -89,6 +95,7 @@ function getPolynomial(coreNames: string[], coefficients: string[]) {
             }
         }
     }
+    common.shuffleList(result)
     return common.replaceWithExponents(result.join("+"));
 
 }
@@ -96,11 +103,12 @@ function getPolynomial(coreNames: string[], coefficients: string[]) {
 
 function genPolynomial(cntVariable: number, cntDegree: number) {
     let names = getNames(cntVariable, cntDegree)
-    let coefficients: any[] = getCoefficients(names, cntDegree);
-    let polynomial = getPolynomial(names, coefficients);
+    let coefficients:any = getCoefficients(names, cntDegree);
+    let polynomial = getPolynomial(names, coefficients.coefficients);
 
 
-    return { "names": names, "coefficients": coefficients, "polynomial": polynomial };
+    // return { "names": names, "coefficients": coefficients, "polynomial": polynomial };
+    return {"question":polynomial,"answer":coefficients.answer};
 }
 
 export { genPolynomial }
