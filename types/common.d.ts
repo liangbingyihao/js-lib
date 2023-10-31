@@ -8,6 +8,7 @@ declare function genNodeFromResult(result: any, minOP: number, maxOp: number, ne
     right: any;
     result: any;
     op: string | undefined;
+    resultStr: any;
 };
 declare function shuffleString(inputString: string): string;
 declare function replaceWithExponents(inputString: string): string;

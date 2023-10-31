@@ -5,6 +5,7 @@ declare function genFormula(level: number, size: number): {
     right: any;
     result: any;
     op: string | undefined;
+    resultStr: any;
 };
 declare function checkResult(correct: any, answer: any): {
     main: string;

@@ -190,7 +190,7 @@ function genNodeFromResult(result: any, minOP: number, maxOp: number, negative: 
         default:
             break;
     }
-    return { "term": term, "value": math.format(result, { fraction: 'ratio' }), "left": left, "right": right, "result": result, "op": opStr }
+    return { "term": term, "value": math.format(result, { fraction: 'ratio' }), "left": left, "right": right, "result": result, "op": opStr,"resultStr":toMixedFraction(result) }
 }
 
 function shuffleString(inputString: string) {

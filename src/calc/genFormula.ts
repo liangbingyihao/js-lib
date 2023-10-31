@@ -95,7 +95,7 @@ function genFormula(level: number, size: number) {
         var right = genNodeFromResult(node.right, minOP, maxOP, negative, fraction, totalMax);
         // console.log("1/4", right);
         var term = "(" + left.term + ")" + node.op + "(" + right.term + ")"
-        return { "term": term, "value": math.format(result, { fraction: 'ratio' }), "left": left, "right": right, "result": result, "op": node.op }
+        return { "term": term, "value": math.format(result, { fraction: 'ratio' }), "left": left, "right": right, "result": result, "op": node.op ,"resultStr":toMixedFraction(result)}
     } else {
         return genNodeFromResult(result, minOP, maxOP, negative, fraction, totalMax);
     }
