@@ -55,6 +55,7 @@ function getNames(cntVariable: number, cntDegree: number) {
 function getCoefficients(coreNames: string[], cntDegree: number) {
     let meanNames = getRandomElements(coreNames.slice(1), Math.min(2, coreNames.length))
     meanNames.push(coreNames[0]);
+    var answer:string[]=[]
     let coefficients = coreNames.map((element) => {
         if (meanNames.indexOf(element) >= 0) {
             let c = math.fraction(common.generateRandomNumber(1, 4) * common.generateRandomNumber(2, 5)
@@ -62,13 +63,18 @@ function getCoefficients(coreNames: string[], cntDegree: number) {
             if(common.generateRandomNumber(1, 3)==1){
                 c = math.multiply(c,-1);
             }
-            return common.genNodeFromResult(c, 0, 1, true, false, 50);
+            let c_str = common.toMixedFraction(c).replace(/[()]/g, '')
+            if(c_str[0]!="-" && answer.length>0){
+                c_str="+"+c_str
+            }
+            answer.push(c_str+element)
+            return common.genNodeFromResult(c, 0, 2, true, false, 50);
         }else{
             return 0;
         }
 
     })
-    return coefficients;
+    return {"coefficients":coefficients,"answer":common.replaceWithExponents(answer.join(""))};
 }
 
 function getPolynomial(coreNames: string[], coefficients: string[]) {
@@ -79,28 +85,34 @@ function getPolynomial(coreNames: string[], coefficients: string[]) {
             continue
         }
         if (!math.equal(cs.left, 0)) {
-            result.push(common.toMixedFraction(cs.left) + common.shuffleString(coreNames[i]))
+            result.push("+"+common.toMixedFraction(cs.left) + common.shuffleString(coreNames[i]))
         }
         if (!math.equal(cs.right, 0)) {
-            if (cs.op == "-") {
-                result.push(common.toMixedFraction(math.multiply(-1, cs.right)) + common.shuffleString(coreNames[i]))
-            } else {
-                result.push(common.toMixedFraction(cs.right) + common.shuffleString(coreNames[i]))
-            }
+            // if (cs.op == "-") {
+            //     result.push(common.toMixedFraction(math.multiply(-1, cs.right)) + common.shuffleString(coreNames[i]))
+            // } else {
+            //     result.push(common.toMixedFraction(cs.right) + common.shuffleString(coreNames[i]))
+            // }
+            result.push(cs.op+common.toMixedFraction(cs.right) + common.shuffleString(coreNames[i]))
         }
     }
-    return common.replaceWithExponents(result.join("+"));
+    common.shuffleList(result)
+    if(result[0][0]=="+"){
+        result[0]=result[0].slice(1)
+    }
+    return common.replaceWithExponents(result.join(""));
 
 }
 
 
 function genPolynomial(cntVariable: number, cntDegree: number) {
     let names = getNames(cntVariable, cntDegree)
-    let coefficients: any[] = getCoefficients(names, cntDegree);
-    let polynomial = getPolynomial(names, coefficients);
+    let coefficients:any = getCoefficients(names, cntDegree);
+    let polynomial = getPolynomial(names, coefficients.coefficients);
 
 
-    return { "names": names, "coefficients": coefficients, "polynomial": polynomial };
+    // return { "names": names, "coefficients": coefficients, "polynomial": polynomial };
+    return {"question":polynomial,"answer":coefficients.answer};
 }
 
 export { genPolynomial }

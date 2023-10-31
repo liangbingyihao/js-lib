@@ -193,17 +193,20 @@ function genNodeFromResult(result: any, minOP: number, maxOp: number, negative: 
     return { "term": term, "value": math.format(result, { fraction: 'ratio' }), "left": left, "right": right, "result": result, "op": opStr,"resultStr":toMixedFraction(result) }
 }
 
-function shuffleString(inputString: string) {
-    // 将字符串转换为字符数组
-    const charArray = inputString.split('');
-    const n = charArray.length;
+function shuffleList(input:any[]){
+    const n = input.length;
 
     // Fisher-Yates 随机化算法
     for (let i = n - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [charArray[i], charArray[j]] = [charArray[j], charArray[i]];
+        [input[i], input[j]] = [input[j], input[i]];
     }
+}
 
+function shuffleString(inputString: string) {
+    // 将字符串转换为字符数组
+    const charArray = inputString.split('');
+    shuffleList(charArray);
     // 将字符数组重新组合成字符串
     const shuffledString = charArray.join('');
     return shuffledString;
@@ -221,7 +224,8 @@ const commont = {
     generateRandomFraction,
     genNodeFromResult,
     shuffleString,
-    replaceWithExponents
+    replaceWithExponents,
+    shuffleList
 }
 
 
