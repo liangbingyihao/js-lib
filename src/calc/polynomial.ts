@@ -64,17 +64,17 @@ function getCoefficients(coreNames: string[], cntDegree: number) {
                 c = math.multiply(c,-1);
             }
             let c_str = common.toMixedFraction(c).replace(/[()]/g, '')
-            if(c_str[0]!="-"){
+            if(c_str[0]!="-" && answer.length>0){
                 c_str="+"+c_str
             }
             answer.push(c_str+element)
-            return common.genNodeFromResult(c, 0, 1, true, false, 50);
+            return common.genNodeFromResult(c, 0, 2, true, false, 50);
         }else{
             return 0;
         }
 
     })
-    return {"coefficients":coefficients,"answer":common.replaceWithExponents(answer.join("").slice(1))};
+    return {"coefficients":coefficients,"answer":common.replaceWithExponents(answer.join(""))};
 }
 
 function getPolynomial(coreNames: string[], coefficients: string[]) {
@@ -85,18 +85,22 @@ function getPolynomial(coreNames: string[], coefficients: string[]) {
             continue
         }
         if (!math.equal(cs.left, 0)) {
-            result.push(common.toMixedFraction(cs.left) + common.shuffleString(coreNames[i]))
+            result.push("+"+common.toMixedFraction(cs.left) + common.shuffleString(coreNames[i]))
         }
         if (!math.equal(cs.right, 0)) {
-            if (cs.op == "-") {
-                result.push(common.toMixedFraction(math.multiply(-1, cs.right)) + common.shuffleString(coreNames[i]))
-            } else {
-                result.push(common.toMixedFraction(cs.right) + common.shuffleString(coreNames[i]))
-            }
+            // if (cs.op == "-") {
+            //     result.push(common.toMixedFraction(math.multiply(-1, cs.right)) + common.shuffleString(coreNames[i]))
+            // } else {
+            //     result.push(common.toMixedFraction(cs.right) + common.shuffleString(coreNames[i]))
+            // }
+            result.push(cs.op+common.toMixedFraction(cs.right) + common.shuffleString(coreNames[i]))
         }
     }
     common.shuffleList(result)
-    return common.replaceWithExponents(result.join("+"));
+    if(result[0][0]=="+"){
+        result[0]=result[0].slice(1)
+    }
+    return common.replaceWithExponents(result.join(""));
 
 }
 
